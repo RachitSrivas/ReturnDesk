@@ -86,7 +86,7 @@ export class ReturnService {
         },
       }),
     ]);
-    return { total, data, page, limit, totalPages: Math.ceil(total / limit) };
+    return { total, data: data as any, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
   static async get(id: string) {
@@ -103,13 +103,13 @@ export class ReturnService {
   // Edit only when status is OPEN or IN_REVIEW
   static async edit(id: string, data: Partial<{ customerName: string; customerEmail: string; customerPhone: string | null; orderNumber: string; itemSku: string; itemName: string; quantity: number; reason: string }>) {
     const request = await this.get(id);
-    if (![ReturnStatus.OPEN, ReturnStatus.IN_REVIEW].includes(request.status)) {
+    if (request.status !== ReturnStatus.OPEN && request.status !== ReturnStatus.IN_REVIEW) {
       throw new ApiError('Only OPEN or IN_REVIEW requests can be edited.', 409);
     }
     // prevent editing locked fields after approval/rejection – already checked
     const updated = await prisma.returnRequest.update({
       where: { id },
-      data,
+      data: data as any,
     });
     return updated;
   }

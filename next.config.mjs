@@ -1,4 +1,3 @@
-module.exports = {
-  reactStrictMode: true,
-  experimental: { appDir: true },
+export default {
+  reactStrictMode: true
 };
