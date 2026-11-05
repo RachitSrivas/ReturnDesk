@@ -1,14 +1,15 @@
+import './globals.css';
 import { ReactNode } from 'react';
 
 export const metadata = {
-  title: 'ReturnDesk API',
-  description: 'Return Management System API & Endpoints',
+  title: 'ReturnDesk | Support Agent Portal',
+  description: 'Production-ready return & replacement management desk',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body style={{ margin: 0, fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', backgroundColor: '#0f172a', color: '#f8fafc' }}>
+      <body className="bg-slate-50 text-slate-900 antialiased font-sans">
         {children}
       </body>
     </html>

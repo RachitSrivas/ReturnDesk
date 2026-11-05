@@ -67,7 +67,7 @@ export class ReturnService {
     if (reason && reason.length) where.reason = { in: reason };
 
     const skip = (page - 1) * limit;
-    const [total, data] = await Promise.all([
+    const [total, data, counts] = await Promise.all([
       prisma.returnRequest.count({ where }),
       prisma.returnRequest.findMany({
         where,
@@ -78,15 +78,44 @@ export class ReturnService {
           id: true,
           reference: true,
           customerName: true,
+          customerEmail: true,
+          customerPhone: true,
           orderNumber: true,
           itemSku: true,
+          itemName: true,
+          quantity: true,
           status: true,
           reason: true,
+          resolution: true,
+          refundAmount: true,
           createdAt: true,
         },
       }),
+      prisma.returnRequest.groupBy({
+        by: ['status'],
+        where: { removedAt: null },
+        _count: { status: true },
+      }),
     ]);
-    return { total, data: data as any, page, limit, totalPages: Math.ceil(total / limit) };
+
+    const stats = {
+      totalActive: 0,
+      OPEN: 0,
+      IN_REVIEW: 0,
+      APPROVED: 0,
+      REJECTED: 0,
+      COMPLETED: 0,
+    };
+    for (const c of counts) {
+      if (c.status in stats) {
+        (stats as any)[c.status] = c._count.status;
+      }
+      if (c.status !== ReturnStatus.REJECTED && c.status !== ReturnStatus.COMPLETED) {
+        stats.totalActive += c._count.status;
+      }
+    }
+
+    return { total, data: data as any, page, limit, totalPages: Math.ceil(total / limit), stats };
   }
 
   static async get(id: string) {
