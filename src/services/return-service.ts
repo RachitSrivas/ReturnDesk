@@ -187,7 +187,7 @@ export class ReturnService {
   // Soft delete – only OPEN or REJECTED and not already removed
   static async softDelete(id: string) {
     const request = await this.get(id);
-    if (![ReturnStatus.OPEN, ReturnStatus.REJECTED].includes(request.status)) {
+    if (request.status !== ReturnStatus.OPEN && request.status !== ReturnStatus.REJECTED) {
       throw new ApiError('Only OPEN or REJECTED requests can be removed.', 409);
     }
     const updated = await prisma.returnRequest.update({
