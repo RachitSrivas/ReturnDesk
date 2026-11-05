@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+
+}
+
+enum ReturnStatus {
+  OPEN
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+enum ReturnReason {
+  DAMAGED
+  WRONG_ITEM
+  SIZE_ISSUE
+  NOT_AS_DESCRIBED
+  CHANGED_MIND
+}
+
+enum ResolutionType {
+  REFUND
+  REPLACEMENT
+  STORE_CREDIT
+}
+
+model ReturnRequest {
+  id            String       @id @default(uuid())
+  reference     String       @unique
+  customerName  String
+  customerEmail String
+  customerPhone String?
+  orderNumber   String
+  itemSku       String
+  itemName      String
+  quantity      Int
+  reason        ReturnReason
+  status        ReturnStatus @default(OPEN)
+  resolution    ResolutionType?
+  refundAmount  Decimal?     @db.Decimal(12,2)
+  removedAt     DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  notes         ReturnNote[]
+
+  @@index([orderNumber, itemSku])
+  // Partial unique index for live requests (open/in_review/approved)
+
+
+}
+
+model ReturnNote {
+  id               String   @id @default(uuid())
+  returnRequestId  String
+  content          String
+  author           String
+  createdAt        DateTime @default(now())
+  returnRequest    ReturnRequest @relation(fields: [returnRequestId], references: [id])
+}
